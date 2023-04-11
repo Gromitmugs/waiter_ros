@@ -1,0 +1,8 @@
+uint8 torque_1
+uint8 torque_2
+uint8 torque_3
+uint8 torque_4
+uint8 torque_5
+uint8 torque_6
+---
+bool result
