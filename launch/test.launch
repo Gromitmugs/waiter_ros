@@ -1,4 +1,10 @@
 <launch>
-    <node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node>
-    <node pkg="waiter_ros" type="diff_tf.py" name="diff_tf" output="screen"></node>
+    <!-- <node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node>
+    <node pkg="waiter_ros" type="diff_tf.py" name="diff_tf" output="screen"></node> -->
+
+    <arg default="robot_description/urdf/waitress_simple_model.xacro" name="model"/>
+    <param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"></node>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"></node>
 </launch>

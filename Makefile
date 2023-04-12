@@ -29,3 +29,7 @@ catkin_make:
 .PHONY: give-permission
 give-permission:
 	make -C scripts give-permission
+
+.PHONY: move-robot-description
+move-robot-description:
+	cp -R robot_description $$HOME/catkin_ws/src
