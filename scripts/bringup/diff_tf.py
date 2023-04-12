@@ -56,6 +56,7 @@ import roslib
 roslib.load_manifest('differential_drive')
 from math import sin, cos, pi
 
+from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
@@ -83,23 +84,30 @@ class DiffTf:
         self.odom_frame_id = rospy.get_param('~odom_frame_id', 'odom') # the name of the odometry reference frame
  
         self.wheel_radius = float(rospy.get_param('~wheel_radius', 0.035))
+        self.wheel_dist = float(rospy.get_param('~wheel_distance', 0.503))
 
         self.t_delta = rospy.Duration(1.0/self.rate)
         self.t_next = rospy.Time.now() + self.t_delta
 
-        
-        
         # internal data
-        self.d_left = 0
+        self.odom_pose = [0, 0, 0]
+        self.last_theta = 0
+
+        self.prev_pos_left = 0
+        self.prev_pos_right = 0
+
+        self.pos_left = 0 # encoder tick
+        self.pos_right = 0
+
+        self.d_left = 0 # distance traveled
         self.d_right = 0
-        self.v_left = 0
+
+        self.v_left = 0 # wheel velocity
         self.v_right = 0
 
-        self.x = 0                  # position in xy plane 
+        self.x = 0  # position in xy plane 
         self.y = 0
-        self.th = 0
-        self.dx = 0                 # speeds in x/rotation
-        self.dr = 0
+        
         self.then = rospy.Time.now()
         
         # subscriptions
@@ -126,39 +134,40 @@ class DiffTf:
             elapsed = now - self.then
             self.then = now
             elapsed = elapsed.to_sec()
-    
-           
-            # distance traveled is the average of the two wheels 
-            d = ( self.d_left + self.d_right ) / 2
-            # this approximation works (in radians) for small angles
-            th = ( self.d_right - self.d_left ) / self.base_width
-            # calculate velocities
-            self.dx = d / elapsed
-            self.dr = th / elapsed
-           
-             
-            if (d != 0):
-                # calculate distance traveled in x and y
-                x = cos( th ) * d
-                y = -sin( th ) * d
-                # calculate the final position of the robot
-                self.x = self.x + ( cos( self.th ) * x - sin( self.th ) * y )
-                self.y = self.y + ( sin( self.th ) * x + cos( self.th ) * y )
-            if( th != 0):
-                self.th = self.th + th
-                
+
+            Vx = (self.v_left + self.v_right) / 2
+            Vz = (self.v_right - self.v_left) / self.wheel_dist
+
+            delta_pos_left = self.pos_left - self.prev_pos_left
+            delta_pos_right = self.pos_right - self.prev_pos_right
+
+            self.prev_pos_left = self.pos_left
+            self.prev_pos_right = self.pos_right
+
+            rad_left = delta_pos_left * 2 * pi / self.ticks_per_rev
+            rad_right = delta_pos_right * 2 * pi / self.ticks_per_rev
+
+            delta_s = self.wheel_radius * (rad_left + rad_right) / 2.0
+            theta = self.wheel_radius * (rad_right - rad_left) / self.wheel_dist
+
+            delta_theta = theta - self.last_theta
+            # self.last_theta = delta_theta
+
+            self.odom_pose[0] += delta_s * cos(self.odom_pose[2] + (delta_theta / 2.0))
+            self.odom_pose[1] += delta_s * sin(self.odom_pose[2] + (delta_theta / 2.0))
+            self.odom_pose[2] += delta_theta
+
+            self.x = self.odom_pose[0]
+            self.y = self.odom_pose[1]
+            
             # publish the odom information
-            quaternion = Quaternion()
-            quaternion.x = 0.0
-            quaternion.y = 0.0
-            quaternion.z = sin( self.th / 2 )
-            quaternion.w = cos( self.th / 2 )
+            quaternion = quaternion_from_euler(0, 0, self.odom_pose[2])
             self.odomBroadcaster.sendTransform(
-                (self.x, self.y, 0),
-                (quaternion.x, quaternion.y, quaternion.z, quaternion.w),
-                rospy.Time.now(),
-                self.base_frame_id,
-                self.odom_frame_id
+                (self.x, self.y, 0), #translation
+                (quaternion[0], quaternion[1], quaternion[2], quaternion[3]), #rotation x,y,z,w
+                rospy.Time.now(), #time
+                self.base_frame_id, #child
+                self.odom_frame_id #parent
                 )
             
             odom = Odometry()
@@ -169,25 +178,24 @@ class DiffTf:
             odom.pose.pose.position.z = 0
             odom.pose.pose.orientation = quaternion
             odom.child_frame_id = self.base_frame_id
-            odom.twist.twist.linear.x = self.dx
+            odom.twist.twist.linear.x = Vx
             odom.twist.twist.linear.y = 0
-            odom.twist.twist.angular.z = self.dr
+            odom.twist.twist.angular.z = Vz
             self.odomPub.publish(odom)
             
-            
-
-
     #############################################################################
     def rawVelCallback(self, msg):
     #############################################################################
-        v_left = msg.data[0]
-        v_right = msg.data[1]
+        self.v_left = msg.data[0]
+        self.v_right = msg.data[1]
         
     #############################################################################
     def rawPosCallback(self, msg):
     #############################################################################
         tick_left = msg.data[0]
         tick_right = msg.data[1]
+        self.pos_left = tick_left
+        self.pos_right = tick_right
         self.d_left = 2 * pi * self.wheel_radius * (tick_left / self.ticks_per_rev)
         self.d_right = 2 * pi * self.wheel_radius * (tick_right / self.ticks_per_rev)
 

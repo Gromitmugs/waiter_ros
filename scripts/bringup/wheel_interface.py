@@ -8,7 +8,7 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 import sys
 
-WHEEL_DIST = 0.52 #in meters
+WHEEL_DIST = 0.502 #in meters
 TYRE_CIRCUMFERENCE = 2*math.pi*0.035
 
 vel_pub = rospy.Publisher('/raw_vel', Float64MultiArray, queue_size=10)
