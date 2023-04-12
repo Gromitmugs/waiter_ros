@@ -1,2 +1,4 @@
-<?xml version="1.0"?>
 <launch>
+    <node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node>
+    <node pkg="waiter_ros" type="diff_tf.py" name="diff_tf" output="screen"></node>
+</launch>
