@@ -60,6 +60,7 @@ from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import JointState
 from tf.broadcaster import TransformBroadcaster
 from std_msgs.msg import Float64MultiArray
 
@@ -89,6 +90,10 @@ class DiffTf:
         self.t_delta = rospy.Duration(1.0/self.rate)
         self.t_next = rospy.Time.now() + self.t_delta
 
+        self.joint_states_names = ["left_wheel_joint", "right_wheel_joint"]
+        self.joint_states_pos = [0, 0]
+        self.joint_states_vel = [0, 0]
+
         # internal data
         self.odom_pose = [0, 0, 0]
         self.last_theta = 0
@@ -115,6 +120,7 @@ class DiffTf:
         rospy.Subscriber("/raw_pos", Float64MultiArray, self.rawPosCallback)
 
         self.odomPub = rospy.Publisher("/odom", Odometry, queue_size=10)
+        self.jointStatePub = rospy.Publisher("/joint_states", JointState, queue_size=10)
         self.odomBroadcaster = TransformBroadcaster()
         
     #############################################################################
@@ -183,6 +189,22 @@ class DiffTf:
             odom.twist.twist.angular.z = Vz
             self.odomPub.publish(odom)
             
+            # joint states
+            self.joint_states_pos[0] += rad_left
+            self.joint_states_pos[1] += rad_right
+
+            self.joint_states_vel[0] = self.v_left
+            self.joint_states_vel[1] = self.v_right
+
+            joint_states = JointState()
+            joint_states.name = self.joint_states_names
+            joint_states.header.frame_id = self.base_frame_id
+            joint_states.position = self.joint_states_pos
+            joint_states.velocity = self.joint_states_vel
+            joint_states.header.stamp = now
+            
+            self.jointStatePub.publish(joint_states)
+
     #############################################################################
     def rawVelCallback(self, msg):
     #############################################################################
