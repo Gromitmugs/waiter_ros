@@ -2,7 +2,7 @@ default:
 	echo Waiter_Ros
 
 .PHONY: install
-install: install-dynamixelsdk install-odrive install-rplidar install-laser-filters catkin_make
+install: install-dynamixelsdk install-odrive install-rplidar install-laser-filters install-diff-drive catkin_make
 
 .PHONY: install-dynamixelsdk 
 install-dynamixelsdk:
@@ -25,7 +25,7 @@ install-odrive:
 .PHONY: install-rplidar
 install-rplidar:
 	cd ~/catkin_ws/src && \
-	gh repo clone Slamtec/rplidar_ros && \
+	gh repo clone Slamtec/rplidar_ros
 
 .PHONY: install-laser-filters
 install-laser-filters:
@@ -33,6 +33,11 @@ install-laser-filters:
 	gh repo clone ros-perception/laser_filters && \
 	cd ~/catkin_ws/src/laser_filters && \
 	git checkout noetic-devel
+	
+.PHONY: install-diff-drive
+install-diff-drive:
+	cd ~/catkin_ws/src && \
+	gh repo clone jfstepha/differential-drive
 
 .PHONY: catkin_make
 catkin_make:

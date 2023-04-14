@@ -1,14 +1,22 @@
 <launch>
-    <!-- <node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node>
+    <!--<node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node> -->
     <node pkg="waiter_ros" type="diff_tf.py" name="diff_tf" output="screen"></node>
 
     <arg default="robot_description/urdf/waitress_simple_model.xacro" name="model"/>
     <param command="$(find xacro)/xacro $(arg model)" name="robot_description"/>
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"></node>
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"></node> -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"></node>
     <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
         <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
-        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <param name="serial_baudrate"     type="int"    value="256000"/>
+        <param name="frame_id"     type="string"    value="lidar_base_1"/>
+    </node>
+    
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen"></node>
+    <node pkg="laser_filters" type="scan_to_scan_filter_chain" output="screen" name="laser_filter">
+    	<remap from="scan" to="base_scan" /> 
+    	<!-- out to scan_filtered -->
+    	<rosparam command="load" file="$(find waiter_ros)/params/laser_scan/angle_filter.yaml" />
     </node>
 </launch>
