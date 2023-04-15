@@ -1,5 +1,5 @@
 <launch>
-    <!--<node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node> -->
+    <node pkg="waiter_ros" type="wheel_test.py" name="wheel" output="screen"></node>
     <node pkg="waiter_ros" type="diff_tf.py" name="diff_tf" output="screen"></node>
 
     <arg default="$(find waiter_ros)/robot_description/urdf/waitress_simple_model.xacro" name="model"/>

@@ -2,7 +2,7 @@ default:
 	echo Waiter_Ros
 
 .PHONY: install
-install: install-dynamixelsdk install-odrive install-rplidar install-laser-filters install-diff-drive catkin_make
+install: install-dynamixelsdk install-odrive install-rplidar install-laser-filters install-diff-drive install-gmapping catkin_make
 
 .PHONY: install-dynamixelsdk 
 install-dynamixelsdk:
@@ -38,6 +38,10 @@ install-laser-filters:
 install-diff-drive:
 	cd ~/catkin_ws/src && \
 	gh repo clone jfstepha/differential-drive
+
+.PHONY: install-gmapping
+install-gmapping:
+	sudo apt-get install ros-noetic-slam-gmapping
 
 .PHONY: catkin_make
 catkin_make:

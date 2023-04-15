@@ -182,7 +182,14 @@ class DiffTf:
             odom.pose.pose.position.x = self.x
             odom.pose.pose.position.y = self.y
             odom.pose.pose.position.z = 0
-            odom.pose.pose.orientation = quaternion
+
+            quaternion_odom = Quaternion()
+            quaternion_odom.x = quaternion[0]
+            quaternion_odom.y = quaternion[1]
+            quaternion_odom.z = quaternion[2]
+            quaternion_odom.w = quaternion[3]
+            odom.pose.pose.orientation = quaternion_odom
+
             odom.child_frame_id = self.base_frame_id
             odom.twist.twist.linear.x = Vx
             odom.twist.twist.linear.y = 0
