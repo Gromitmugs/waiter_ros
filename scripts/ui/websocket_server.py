@@ -8,13 +8,16 @@ from std_msgs.msg import String
 
 
 async def handler(websocket):
-    pub = rospy.Publisher('chatter', String, queue_size=10)
+    pub = rospy.Publisher('cmd_lift', String, queue_size=10)
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     while True:
         message = await websocket.recv()
-        print(message)
+        print("Received from Client < ",message)
+        print('Publishing Msg From ROS')
         pub.publish(message)
+        await websocket.send(message)
+        print("Send to Client > ",message)
         rate.sleep()
 
 async def main():

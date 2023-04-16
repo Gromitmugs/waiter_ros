@@ -1,15 +1,20 @@
 import asyncio
-
+import rospy
 import websockets
 
-
-@asyncio.coroutine
 async def hello():
-    websocket = await websockets.connect('ws://localhost:8765/')
-    name = input("What's your name? ")
-    await websocket.send(name)
-    print("> {}".format(name))
-    greeting = await websocket.recv()
-    print("< {}".format(greeting))
+    websocket = await  websockets.connect('ws://localhost:8001/')
+    while True:
+        message = input("Send a command to server? ")
+        await websocket.send(message)
+        print("Sent To Server > {}".format(message))
+        response = await websocket.recv()
+        print("Received From Server < {}".format(response))
 
-asyncio.get_event_loop().run_until_complete(hello())
+if __name__ == "__main__":
+    try:
+        asyncio.run(hello())
+    except rospy.ROSInterruptException:
+        pass
+  
+
