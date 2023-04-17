@@ -4,6 +4,15 @@
 <xacro:include filename="$(find waitress_simple_model_description)/urdf/materials.xacro" />
 <xacro:include filename="$(find waitress_simple_model_description)/urdf/waitress_simple_model.trans" />
 <xacro:include filename="$(find waitress_simple_model_description)/urdf/waitress_simple_model.gazebo" />
+
+<link name="dummy">
+  </link>
+
+<joint name="dummy_joint" type="fixed">
+  <parent link="dummy"/>
+  <child link="base_link"/>
+</joint>
+
 <link name="base_link">
   <inertial>
     <origin xyz="0.00011071575072432313 -3.8859905316548345e-17 0.4305023814711941" rpy="0 0 0"/>
