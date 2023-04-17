@@ -1,0 +1,9 @@
+<launch>
+    <arg name="map_file" default="$(find rur_navigation)/maps/house_map.yaml"/>
+    <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+    <include file="$(find waiter_ros)/launch/amcl.launch"/>
+
+    <include file="$(find waiter_ros)/launch/move_base.launch"/>
+
+</launch>

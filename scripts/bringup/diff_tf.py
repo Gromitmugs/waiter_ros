@@ -137,7 +137,7 @@ class DiffTf:
     #############################################################################
     def update(self):
     #############################################################################
-        now = rospy.Time.now() + rospy.Duration(5)
+        now = rospy.Time.now() ## + rospy.Duration(5)
         if now > self.t_next:
             elapsed = now - self.then
             self.then = now
@@ -176,7 +176,7 @@ class DiffTf:
                 now, #time
                 self.odom_child_frame_id, #child
                 self.odom_frame_id #parent
-                )
+            )
             
             odom = Odometry()
             odom.header.stamp = now
