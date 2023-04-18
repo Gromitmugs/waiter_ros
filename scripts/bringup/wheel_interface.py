@@ -30,8 +30,8 @@ odrv0.axis1.encoder.set_linear_count(0)
 
 def convert(forward,ccw):
     angular_to_linear = ccw*(WHEEL_DIST/2.0)
-    left_linear_val  = (forward - angular_to_linear) * (60/TYRE_CIRCUMFERENCE) #RPM???
-    right_linear_val = (forward + angular_to_linear) * (60/TYRE_CIRCUMFERENCE) #RPM???
+    right_linear_val  = (forward - angular_to_linear) * (60/TYRE_CIRCUMFERENCE) #RPM???
+    left_linear_val = (forward + angular_to_linear) * (60/TYRE_CIRCUMFERENCE) #RPM???
     return left_linear_val, right_linear_val
 
 def cmd_vel_callback(msg):
@@ -59,10 +59,10 @@ def start_odrive():
         try:
             try:
             # rospy.loginfo('{}'.format(vel))
-                vel[0] = float(-1*odrv0.axis0.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel left
-                vel[1] = float(odrv0.axis1.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel right
-                pos[0] = -1*odrv0.axis0.encoder.pos_estimate_counts #pos left
-                pos[1] = odrv0.axis1.encoder.pos_estimate_counts #pos right
+                vel[1] = float(-1*odrv0.axis0.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel right
+                vel[0] = float(odrv0.axis1.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel left
+                pos[1] = -1*odrv0.axis0.encoder.pos_estimate_counts #pos right
+                pos[0] = odrv0.axis1.encoder.pos_estimate_counts #pos left
             except:
                 pass
             raw_vel.data = tuple(vel)

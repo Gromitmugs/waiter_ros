@@ -1,7 +1,7 @@
 <launch>
 
 <rosparam file="$(find waitress_simple_model_description)/launch/controller.yaml" command="load"/>
-<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="waitress_simple_model" args="right_wheel_joint_position_controller left_wheel_joint_position_controller joint_state_controller "/>
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="waitress_simple_model" args="left_wheel_joint_position_controller right_wheel_joint_position_controller joint_state_controller "/>
 <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
   <remap from="/joint_states" to="/waitress_simple_model/joint_states"/>
 </node>

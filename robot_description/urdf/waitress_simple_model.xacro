@@ -1,0 +1,120 @@
+<?xml version="1.0" ?>
+<robot name="waitress_simple_model" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find waitress_simple_model_description)/urdf/materials.xacro" />
+<xacro:include filename="$(find waitress_simple_model_description)/urdf/waitress_simple_model.trans" />
+<xacro:include filename="$(find waitress_simple_model_description)/urdf/waitress_simple_model.gazebo" />
+
+<link name="dummy">
+  </link>
+
+<joint name="dummy_joint" type="fixed">
+  <parent link="dummy"/>
+  <child link="base_link"/>
+</joint>
+
+<link name="base_link">
+  <inertial>
+    <origin xyz="0.00011071575072432313 -3.8859905316548345e-17 0.4305023814711941" rpy="0 0 0"/>
+    <mass value="1881.3432897424466"/>
+    <inertia ixx="142.501445" iyy="157.132903" izz="93.927415" ixy="0.0" iyz="0.0" ixz="-0.084286"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="left_wheel_1">
+  <inertial>
+    <origin xyz="5.551115123125783e-17 0.04500000000000004 0.0" rpy="0 0 0"/>
+    <mass value="2.718930631957457"/>
+    <inertia ixx="0.002668" iyy="0.001665" izz="0.002668" ixy="0.0" iyz="0.0" ixz="-0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.195 -0.2515 -0.035" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.195 -0.2515 -0.035" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="right_wheel_1">
+  <inertial>
+    <origin xyz="0.0 -0.045000000000000095 0.0" rpy="0 0 0"/>
+    <mass value="2.7189306319574555"/>
+    <inertia ixx="0.002668" iyy="0.001665" izz="0.002668" ixy="-0.0" iyz="0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.195 0.2515 -0.035" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.195 0.2515 -0.035" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="lidar_base_1">
+  <inertial>
+    <origin xyz="0.0 -7.105427357601002e-17 0.025000000000000022" rpy="0 0 0"/>
+    <mass value="1.6427643240024135"/>
+    <inertia ixx="0.000889" iyy="0.000889" izz="0.001094" ixy="0.0" iyz="0.0" ixz="0.0"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.344 0.0 -0.655" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/lidar_base_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="silver"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.344 0.0 -0.655" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://waitress_simple_model_description/meshes/lidar_base_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="left_wheel_joint" type="continuous">
+  <origin xyz="0.195 0.2515 0.035" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="left_wheel_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<joint name="right_wheel_joint" type="continuous">
+  <origin xyz="0.195 -0.2515 0.035" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="right_wheel_1"/>
+  <axis xyz="0.0 1.0 0.0"/>
+</joint>
+
+<joint name="lidar_joint" type="fixed">
+  <origin xyz="0.344 0.0 0.655" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="lidar_base_1"/>
+</joint>
+
+</robot>

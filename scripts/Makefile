@@ -3,4 +3,4 @@ default:
 
 .PHONY: give-permission
 give-permission:
-	chmod -R a+rX *
+	chmod -R +x *
