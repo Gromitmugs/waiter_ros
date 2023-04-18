@@ -92,6 +92,8 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
+        dummy:
+          {}
         map:
           odom:
             base_link:
@@ -176,7 +178,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: -1.6450001001358032
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
