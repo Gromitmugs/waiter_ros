@@ -4,44 +4,53 @@ import asyncio
 
 import rospy
 import websockets
+import yaml
 from std_msgs.msg import String
 
+FREE = 0
+BUSY = 1
 
 async def handler(websocket):
-    PUMP_pub = rospy.Publisher('PUMP_CTRL', String, queue_size=10)
+    global FREE
+    global BUSY
+
+    
+    # PUMP_pub = rospy.Publisher('PUMP_CTRL', String, queue_size=10)
     LIFT_pub = rospy.Publisher('LIFT_CTRL', String, queue_size=10)
-    ARM_pub = rospy.Publisher('ARM_CTRL', String, queue=10)
-    NAV_pub = rospy.Publisher('NAV_CTRL', String, queue=10)
+    # ARM_pub = rospy.Publisher('ARM_CTRL', String, queue_size=10)
+    # NAV_pub = rospy.Publisher('NAV_CTRL', String, queue_size=10)
     rospy.init_node('ws_talker', anonymous=True)
     rate = rospy.Rate(10)  # 10hz
-    STATUS = rospy.get_param('/status')
+    # STATUS = rospy.get_param('/status')
+    STATUS = 'FREE'
     while True:
-        message = await websocket.recv()
-        print("Received from Client < ", message)
-
-        while STATUS == '1':
+        yaml_message = await websocket.recv()
+        print("Received from Client < ", yaml_message)
+        dict_message = yaml.load(yaml_message)
+        print(dict_message)
+        while STATUS == BUSY:
             print('Waiting for previous action to finish')
 
-        if message.op == 'pump':
+        if dict_message['op'] == 'pump':
             print('Publishing {0} from websocket to ros topic according to: {1}'.format(
-                message.data, message.op))
-            PUMP_pub.publish(message.data)
-        elif message.op == 'lift':
+                dict_message['data'], dict_message['op']))
+            PUMP_pub.publish(dict_message['data'])
+        elif dict_message['op']  == 'lift':
             print('Publishing {0} from websocket to ros topic according to: {1}'.format(
-                message.data, message.op))
-            LIFT_pub.publish(message.data)
-        elif message.op == 'arm':
+                dict_message['data'], dict_message['op']))
+            LIFT_pub.publish(dict_message['data'])
+        elif dict_message['op'] == 'arm':
             print('Publishing {0} from websocket to ros topic according to: {1}'.format(
-                message.data, message.op))
-            ARM_pub.publish(message.data)
-        elif message.op == 'nav':
+                dict_message['data'], dict_message['op']))
+            ARM_pub.publish(dict_message['data'])
+        elif dict_message['op'] == 'nav':
             print('Publishing {0} from websocket to ros topic according to: {1}'.format(
-                message.data, message.op))
-            NAV_pub.publish(message.data)
+                dict_message['data'], dict_message['op']))
+            NAV_pub.publish(dict_message['data'])
             
-        await websocket.send(message)
-        print("Send to Client > ", message)
-        rate.sleep()
+        await websocket.send(dict_message)
+        print("Send to Client > ", dict_message)
+    rate.sleep()  
 
 
 async def main():
