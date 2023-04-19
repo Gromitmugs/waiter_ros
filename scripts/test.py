@@ -18,7 +18,7 @@ def main():
 		if gpio.input(24):
 			print('1')
 		else:
-			print('0')
+			print('0 bv  ')
 
 if __name__ == '__main__':
     main()
