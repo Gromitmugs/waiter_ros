@@ -6,14 +6,13 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 
 # Data structure: receive location command with pos data type. (positions and quarternions)
 # Topic nav_location:
+#                   data: "KITCHEN"
+# Service that stores location
 #                   location:
-#                           name: kitchen
-#                           position: x, y
-#                           orientation: r1, r2, r3, r4
-#                   location:  
-#                           name: table
-#                           position: x, y
-#                           orientation: r1, r2, r3, r4
+#                           string navLocation
+#                           ---
+#                           geometry_msgs/Pose navLocation (position and quaternion)
+#                           string navLocation.name
 
 class Navigator():
 
