@@ -2,8 +2,7 @@
 
 import rospy
 from dynamixel_sdk import *
-from dynamixel_sdk_examples.srv import *
-from dynamixel_sdk_examples.msg import *
+from waiter_ros.srv import *
 import time
 
 # Variables
@@ -17,6 +16,7 @@ ADDR_PRESENT_POSITION   = 132
 ADDR_PROFILE_VELOCITY = 112
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
+ADDR_GOAL_PWM = 100
 
 
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
@@ -29,6 +29,8 @@ LEN_GOAL_POSITION           = 4         # Data Byte Length
 LEN_PRESENT_POSITION        = 4         # Data Byte Length
 DXL_MINIMUM_POSITION_VALUE  = 0         # Refer to the Minimum Position Limit of product eManual
 DXL_MAXIMUM_POSITION_VALUE  = 4095      # Refer to the Maximum Position Limit of product eManual
+DXL_PWM_MODE = 16
+
 
 # Robot Arm IDs
 DXL_BASE = 1
@@ -52,6 +54,7 @@ DXL_GRIPPER_LIMIT = (2,1000)
 DXL_JOINTS_LIMITS = [DXL_BASE_LIMIT, DXL_SHOULDER_2_LIMIT, DXL_SHOULDER_3_LIMIT, DXL_ELBOW_LIMIT, DXL_WRIST_LIMIT, DXL_GRIPPER_LIMIT]
 
 DEFAULT_PROFILE_VELOCITY = 10 # value * 0.229 rpm
+DEFAULT_PWM_VAL = 200
 
 # Setup
 portHandler = PortHandler(DEVICENAME)
@@ -74,37 +77,41 @@ def get_current_position(dxl_id):
 
 def gripper_control(req):
     if req.operation == 0:
-        gripper_vel = DEFAULT_PROFILE_VELOCITY * -1
+        gripper_pwm = DEFAULT_PWM_VAL * -1
+        print("closing gripper")
     elif req.operation == 1:
-        gripper_vel = DEFAULT_PROFILE_VELOCITY
+        gripper_pwm = DEFAULT_PWM_VAL
+        print("opening gripper")
     elif req.operation == 2:
-        gripper_vel = 0
+        gripper_pwm = 0
+        print("stop gripper")
     else:
         return False
-
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_GRIPPER, ADDR_GOAL_VELOCITY, gripper_vel)
+    
+    dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_GRIPPER, ADDR_GOAL_PWM, gripper_pwm)
     if dxl_comm_result != COMM_SUCCESS:
         print("%s DXL_ID#%d" % packetHandler.getTxRxResult(dxl_comm_result), DXL_GRIPPER)
         return False
     elif dxl_error != 0:
         print("%s DXL_ID#%d" % packetHandler.getRxPacketError(dxl_error), DXL_GRIPPER)
-        return False
+        return False 
 
     return True
 
-def set_current_position_control_mode(dxl_id):
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dxl_id, ADDR_OPERATING_MODE, 5)
+def set_pwm_mode(dxl_id):
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dxl_id, ADDR_OPERATING_MODE, DXL_PWM_MODE)
     if dxl_comm_result != COMM_SUCCESS:
         print("%s DXL_ID#%d" % (packetHandler.getTxRxResult(dxl_comm_result), dxl_id))
     elif dxl_error != 0:
         print("%s DXL_ID#%d" % (packetHandler.getRxPacketError(dxl_error), dxl_id))
     else:
-        print("Dynamixel#%d has been successfully configured as Current-based Position Control Mode." % dxl_id)
+        print("Dynamixel#%d has been successfully configured as PWM Mode." % dxl_id)
 
 def initialize_dxls(DXL_JOINTS):
     for dxl_id in DXL_JOINTS:
         if dxl_id == DXL_GRIPPER:
-            set_current_position_control_mode(dxl_id)
+            disable_torque(dxl_id)
+            set_pwm_mode(dxl_id)
 
         enable_torque(dxl_id)
         set_profile_velocity(dxl_id, DEFAULT_PROFILE_VELOCITY)

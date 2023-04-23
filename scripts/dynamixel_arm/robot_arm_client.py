@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from dynamixel_sdk_examples.srv import *
 import rospy
+from waiter_ros.srv import *
 
 home_pose = [3192, 1926, -1, 1403, 1000, -1]
 rest_pose = [3192 , 1600, -1, 800, 1000, -1]
@@ -26,5 +26,5 @@ def set_arm_position_client(pose):
         print("Service call failed: %s"%e)
 
 if __name__ == "__main__":
-    set_arm_position_client(poses["rest"])
+    set_arm_position_client(poses["home"])
 
