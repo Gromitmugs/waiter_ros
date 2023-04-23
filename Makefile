@@ -54,3 +54,9 @@ give-permission:
 .PHONY: move-robot-description
 move-robot-description:
 	cp -R robot_description $$HOME/catkin_ws/src
+
+.PHONY: show-usb
+show-usb:
+	dmesg | grep ttyACM
+	ls -l /dev/ttyACM*
+
