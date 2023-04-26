@@ -32,11 +32,10 @@ def start_odrive():
     while not rospy.is_shutdown():
         try:
             try:
-            # rospy.loginfo('{}'.format(vel))
-                vel[0] = float(-1*odrv0.axis0.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel left
-                vel[1] = float(odrv0.axis1.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel right
-                pos[0] = -1*odrv0.axis0.encoder.pos_estimate_counts #pos left
-                pos[1] = odrv0.axis1.encoder.pos_estimate_counts #pos right
+                vel[1] = float(-1*odrv0.axis0.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel right
+                vel[0] = float(odrv0.axis1.encoder.vel_estimate * TYRE_CIRCUMFERENCE) #vel left
+                pos[1] = -1*odrv0.axis0.encoder.pos_estimate_counts #pos right
+                pos[0] = odrv0.axis1.encoder.pos_estimate_counts #pos left
             except:
                 pass
             raw_vel.data = tuple(vel)
