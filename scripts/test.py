@@ -5,20 +5,26 @@ import time
 
 def main():
 	gpio.setmode(gpio.BCM)
-	gpio.setup(24, gpio.IN, pull_up_down=gpio.PUD_DOWN)
-	# while True:
-	# 	print('1')
-	# 	gpio.output(24, gpio.HIGH)
-	# 	time.sleep(1)
-	# 	print('0')
-	# 	gpio.output(24, gpio.LOW)
-	# 	time.sleep(1)
-	i = gpio.input(24) 
-	while True:
-		if gpio.input(24):
-			print('1')
-		else:
-			print('0 bv  ')
+	gpio.setup(23, gpio.OUT)
+	gpio.setup(24, gpio.OUT)
+	gpio.setup(25, gpio.OUT)
 
+	while True:
+		print('1')
+		gpio.output(23, gpio.HIGH)
+		gpio.output(24, gpio.LOW)
+		gpio.output(25, gpio.LOW)
+		time.sleep(1)
+		print('2')
+		gpio.output(23, gpio.LOW)
+		gpio.output(24, gpio.HIGH)
+		gpio.output(25, gpio.LOW)
+		time.sleep(1)
+		print('3')
+		gpio.output(23, gpio.LOW)
+		gpio.output(24, gpio.LOW)
+		gpio.output(25, gpio.HIGH)
+		time.sleep(1)
+	
 if __name__ == '__main__':
     main()
