@@ -2,6 +2,7 @@ import actionlib
 import rospy
 from actionlib_msgs.msg import *
 from geometry_msgs.msg import Point, Pose, Quaternion
+from std_msgs.msg import String
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from location_param import ROBOT_LOCATION
 
@@ -23,7 +24,7 @@ class Navigator():
         self.goal_sent = False
 
         # Receive command from websocket_server.py
-        rospy.Subscriber("NAV_CTRL", Pose, self.callback)
+        rospy.Subscriber("NAV_CTRL", String, self.callback)
 
         # What to do if shut down (e.g. Ctrl-C or failure)
         rospy.on_shutdown(self.shutdown)
@@ -55,6 +56,7 @@ class Navigator():
                     "The base failed to reach the desired pose at destination")
 
         elif data.data == 'TABLE':
+            print(ROBOT_LOCATION['table'])
             position = {'x': ROBOT_LOCATION['table'].position.x,
                         'y': ROBOT_LOCATION['table'].position.y}
             quaternion = {'r1': ROBOT_LOCATION['table'].orientation.x, 'r2': ROBOT_LOCATION['table'].orientation.y,

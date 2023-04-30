@@ -9,25 +9,25 @@ table = Pose()
 
 # kitchen
 # position
-kitchen.position.x = 0.213
-kitchen.position.y = 0.23123
+kitchen.position.x = 1.0071601867675781
+kitchen.position.y = -0.328400582075119
 kitchen.position.z = 0.0
 # orientation
-kitchen.orientation.x = .123123
-kitchen.orientation.y = .23123
-kitchen.orientation.z = .23123
-kitchen.orientation.w = .23123
+kitchen.orientation.x = 0.0
+kitchen.orientation.y = 0.0
+kitchen.orientation.z = 0.9999715405924883
+kitchen.orientation.w = 0.007544402235145885
 
 # table
 # position
-table.position.x = 0.213
-table.position.y = 0.23123
+table.position.x = 1.0700958967208862
+table.position.y = 0.0645441859960556
 table.position.z = 0.0
 # orientation
-table.orientation.x = .123123
-table.orientation.y = .23123
-table.orientation.z = .23123
-table.orientation.w = .23123
+table.orientation.x = 0.0
+table.orientation.y = 0.0
+table.orientation.z = -0.9999999508287969
+table.orientation.w = 0.0003135959242781405
 
 ROBOT_LOCATION = {
     'kitchen': kitchen,

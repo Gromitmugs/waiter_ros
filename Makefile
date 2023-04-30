@@ -60,3 +60,7 @@ show-usb:
 	dmesg | grep ttyACM
 	ls -l /dev/ttyACM*
 
+.PHONY: save-map
+save-map:
+	rosrun map_server map_saver -f maps/map
+

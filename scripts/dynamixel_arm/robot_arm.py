@@ -5,12 +5,13 @@ from waiter_ros.srv import *
 from robot_arm_params import ARM_POSES
 from std_msgs.msg import String
 
-def set_arm_position_client(pose):
+def set_arm_position_client(poses):
     rospy.wait_for_service('set_arm_position')
     try:
         set_arm_position = rospy.ServiceProxy('set_arm_position', SetArmPosition)
-        response = set_arm_position(pose[0],pose[1],pose[2],pose[3],pose[4],pose[5])
-        print("Result:",response.success)
+        for pose in poses:
+            response = set_arm_position(pose[0],pose[1],pose[2],pose[3],pose[4],pose[5])
+            print("Result:",response.success)
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
 
