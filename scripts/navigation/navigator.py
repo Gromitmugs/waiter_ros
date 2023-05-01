@@ -24,7 +24,7 @@ class Navigator():
         self.goal_sent = False
 
         # Receive command from websocket_server.py
-        rospy.Subscriber("NAV_CTRL", String, self.callback)
+        rospy.Subscriber("nav_ctrl", String, self.callback)
 
         # What to do if shut down (e.g. Ctrl-C or failure)
         rospy.on_shutdown(self.shutdown)
@@ -40,11 +40,13 @@ class Navigator():
     def callback(self, data):
         rospy.set_param('ROBOT_STATUS', '1')  # assuming 1 is not free
         print("NAVIGATING!")
+
         if data.data == 'KITCHEN':
-            position = {'x': ROBOT_LOCATION['kitchen'].position.x,
-                        'y': ROBOT_LOCATION['kitchen'].position.y}
-            quaternion = {'r1': ROBOT_LOCATION['kitchen'].orientation.x, 'r2': ROBOT_LOCATION['kitchen'].orientation.y,
-                          'r3': ROBOT_LOCATION['kitchen'].orientation.z, 'r4': ROBOT_LOCATION['kitchen'].orientation.w}
+            kitchen_location = ROBOT_LOCATION['kitchen']
+            position = {'x': kitchen_location.position.x,
+                        'y': kitchen_location.position.y}
+            quaternion = {'r1': kitchen_location.orientation.x, 'r2': kitchen_location.orientation.y,
+                          'r3': kitchen_location.orientation.z, 'r4': kitchen_location.orientation.w}
             rospy.loginfo("Going to %s at (%s, %s) pose",
                           data.data, position['x'], position['y'])
             success = self.goto(position, quaternion)
@@ -56,11 +58,11 @@ class Navigator():
                     "The base failed to reach the desired pose at destination")
 
         elif data.data == 'TABLE':
-            print(ROBOT_LOCATION['table'])
-            position = {'x': ROBOT_LOCATION['table'].position.x,
-                        'y': ROBOT_LOCATION['table'].position.y}
-            quaternion = {'r1': ROBOT_LOCATION['table'].orientation.x, 'r2': ROBOT_LOCATION['table'].orientation.y,
-                          'r3': ROBOT_LOCATION['table'].orientation.z, 'r4': ROBOT_LOCATION['table'].orientation.w}
+            table_location = ROBOT_LOCATION['table']
+            position = {'x': table_location.position.x,
+                        'y': table_location.position.y}
+            quaternion = {'r1': table_location.orientation.x, 'r2': table_location.orientation.y,
+                          'r3': table_location.orientation.z, 'r4': table_location.orientation.w}
             rospy.loginfo("Going to %s at (%s, %s) pose",
                           data.data, position['x'], position['y'])
             success = self.goto(position, quaternion)

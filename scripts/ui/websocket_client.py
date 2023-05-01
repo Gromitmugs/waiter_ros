@@ -6,7 +6,7 @@ import yaml
 
 async def hello():
     
-    websocket = await  websockets.connect('ws://localhost:8001/')
+    websocket = await  websockets.connect('ws://localhost:8002/')
     test_dict = {
         'op': 'pump',
         'data': 'data'
