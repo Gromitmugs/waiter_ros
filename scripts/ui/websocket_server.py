@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 import asyncio
 
 import rospy
@@ -15,7 +16,7 @@ async def handler(websocket):
     global BUSY
 
     
-    # PUMP_pub = rospy.Publisher('PUMP_CTRL', String, queue_size=10)
+    PUMP_pub = rospy.Publisher('PUMP_CTRL', String, queue_size=10)
     LIFT_pub = rospy.Publisher('LIFT_CTRL', String, queue_size=10)
     # ARM_pub = rospy.Publisher('ARM_CTRL', String, queue_size=10)
     # NAV_pub = rospy.Publisher('NAV_CTRL', String, queue_size=10)
@@ -30,7 +31,6 @@ async def handler(websocket):
         print(dict_message)
         while STATUS == BUSY:
             print('Waiting for previous action to finish')
-
         if dict_message['op'] == 'pump':
             print('Publishing {0} from websocket to ros topic according to: {1}'.format(
                 dict_message['data'], dict_message['op']))
@@ -48,8 +48,8 @@ async def handler(websocket):
                 dict_message['data'], dict_message['op']))
             NAV_pub.publish(dict_message['data'])
             
-        await websocket.send(dict_message)
-        print("Send to Client > ", dict_message)
+        # await websocket.send(dict_message)
+        # print("Send to Client > ", dict_message)
     rate.sleep()  
 
 

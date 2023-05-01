@@ -5,11 +5,12 @@ import yaml
 
 
 async def hello():
-    
+    print('type your destination')
+    destination = input()
     websocket = await  websockets.connect('ws://localhost:8001/')
     test_dict = {
         'op': 'pump',
-        'data': 'data'
+        'data': destination
     }
     yaml_message = yaml.dump(test_dict)
     print('yaml_message', yaml_message)

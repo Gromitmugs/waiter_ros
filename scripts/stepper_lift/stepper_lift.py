@@ -5,11 +5,13 @@ from std_msgs.msg import String
 import RPi.GPIO as gpio
 from time import sleep
 
-DIR = 18  # Direction Pin
-STEP = 25  # Step Pin
-EN = 12  # Enable Pin
+DIR = 14  # Direction Pin
+STEP = 15  # Step Pin
+EN = 18 # Enable Pin
 
-LM = 24 # Limit Switch
+LM = 12 # Limit Switch
+
+level_1_height = 1
 
 # data type: "TOP" "BOTTOM"
 def callback(data):
@@ -24,7 +26,7 @@ def callback(data):
 def liftControl():
     # init subscriber node to listen to websocket
     rospy.init_node('lift_controller', anonymous=True)
-    rospy.Subscriber("cmd_lift", String, callback)
+    rospy.Subscriber("LIFT_CTRL", String, callback)
     rospy.spin()
 
 
@@ -33,17 +35,26 @@ def moveLift(level):
     global STEP
     global EN
     global LM
-    print(level)
-    # move lift down
-    if level == "TOP":
-        print('moving lift top')
-        gpio.output(DIR, gpio.HIGH)
-        revConversion()
+    global level_1_height
+    if level == "LEVEL_1":
+        if gpio.input(LM):
+            print('lift is not at home, going home')
+            gpio.output(DIR, gpio.HIGH)
+            while gpio.input(LM):
+                gpio.output(STEP, gpio.HIGH)
+                sleep(.0005)
+                gpio.output(STEP, gpio.LOW)
+                sleep(.0005)
+        if not gpio.input(LM):
+            print('lift is already home, going to level 1')
+            gpio.output(DIR, gpio.LOW)
+            for i in range(level_1_height):
+                revConversion()
     elif level == "HOME":
-        # if not gpio.input(LM):
-        #     print('lift is already home')
-        #     return
-        # print('moving lift home')
+        if not gpio.input(LM):
+            print('lift is already home')
+            return
+        print('moving lift home')
         gpio.output(DIR, gpio.HIGH)
         while gpio.input(LM):
             gpio.output(STEP, gpio.HIGH)
@@ -51,9 +62,7 @@ def moveLift(level):
             gpio.output(STEP, gpio.LOW)
             sleep(.0005)
     else:  # move lift down
-        gpio.output(DIR, gpio.LOW)
-        revConversion()
-
+        print('unknown level, skipping')
 
 def revConversion():
     global DIR
@@ -77,6 +86,8 @@ def init():
     gpio.setup(STEP, gpio.OUT)
     gpio.setup(EN, gpio.OUT)
     gpio.output(EN, gpio.LOW)
+ 
+
 
 if __name__ == '__main__':
     try:
