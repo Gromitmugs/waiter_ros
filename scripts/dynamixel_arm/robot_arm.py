@@ -16,8 +16,10 @@ def set_arm_position_client(poses):
         print("Service call failed: %s"%e)
 
 def callback(data):
-    if data.data.isnumeric():
-        gripper_control_client(data.data)
+    if data.data == 'open':
+        gripper_control_client(1)
+    elif data.data == 'close':
+        gripper_control_client(0)
     else:
         set_arm_position_client(ARM_POSES[data.data])
 

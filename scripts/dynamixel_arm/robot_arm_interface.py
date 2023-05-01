@@ -53,7 +53,7 @@ DXL_GRIPPER_LIMIT = (2024,3150)
 
 DXL_JOINTS_LIMITS = [DXL_BASE_LIMIT, DXL_SHOULDER_2_LIMIT, DXL_SHOULDER_3_LIMIT, DXL_ELBOW_LIMIT, DXL_WRIST_LIMIT, DXL_GRIPPER_LIMIT]
 
-DEFAULT_PROFILE_VELOCITY = 10 # value * 0.229 rpm
+DEFAULT_PROFILE_VELOCITY = 12 # value * 0.229 rpm
 DEFAULT_PWM_VAL = 885
 
 # Setup
@@ -76,19 +76,19 @@ def get_current_position(dxl_id):
     return dxl_present_position, err
 
 def gripper_control(req):
-    if req.operation == 0:
-        gripper_pwm = DEFAULT_PWM_VAL * -1
-        print("closing gripper")
-    elif req.operation == 1:
-        gripper_pwm = DEFAULT_PWM_VAL
-        print("opening gripper")
-    elif req.operation == 2:
-        gripper_pwm = 0
-        print("stop gripper")
-    else:
-        return False
+    operations = {
+        0: 'close',
+        1: 'open',
+    }
+    gripper_positions = {
+        'close': 2442,
+        'open': 3000,
+    }
+
+    gripper_op = operations[req.operation]
+    print("gripper"+gripper_op)
     
-    dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_GRIPPER, ADDR_GOAL_PWM, gripper_pwm)
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_GRIPPER, ADDR_GOAL_POSITION, gripper_positions[gripper_op])
     if dxl_comm_result != COMM_SUCCESS:
         print("%s DXL_ID#%d" % packetHandler.getTxRxResult(dxl_comm_result), DXL_GRIPPER)
         return False
