@@ -1,15 +1,20 @@
 import asyncio
 import rospy
 import websockets
+import yaml
+
 
 async def hello():
+    
     websocket = await  websockets.connect('ws://localhost:8001/')
-    while True:
-        message = input("Send a command to server? ")
-        await websocket.send(message)
-        print("Sent To Server > {}".format(message))
-        response = await websocket.recv()
-        print("Received From Server < {}".format(response))
+    test_dict = {
+        'op': 'pump',
+        'data': 'data'
+    }
+    yaml_message = yaml.dump(test_dict)
+    print('yaml_message', yaml_message)
+    await websocket.send(yaml_message)
+    print("Sent To Server > {}".format(yaml_message))
 
 if __name__ == "__main__":
     try:
