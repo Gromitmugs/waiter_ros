@@ -6,10 +6,10 @@ import RPi.GPIO as gpio
 from time import sleep
 
 DIR = 18  # Direction Pin
-STEP = 25  # Step Pin
-EN = 12  # Enable Pin
+STEP = 15  # Step Pin
+EN = 14  # Enable Pin
 
-LM = 24 # Limit Switch
+LM = 12 # Limit Switch
 
 # data type: "TOP" "BOTTOM"
 def callback(data):
@@ -24,7 +24,7 @@ def callback(data):
 def liftControl():
     # init subscriber node to listen to websocket
     rospy.init_node('lift_controller', anonymous=True)
-    rospy.Subscriber("cmd_lift", String, callback)
+    rospy.Subscriber("LIFT_CTRL", String, callback)
     rospy.spin()
 
 

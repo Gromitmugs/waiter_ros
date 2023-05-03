@@ -5,9 +5,9 @@ from std_msgs.msg import String
 import RPi.GPIO as gpio
 from time import sleep
 
-PUMP0 = 24
-PUMP1 = 13
-PUMP2 = 15
+PUMP0 = 23
+PUMP1 = 24
+PUMP2 = 25
 
 def init():
     global PUMP0
@@ -31,7 +31,7 @@ def callback(data):
     global PUMP0
     global PUMP1
     global PUMP2
-    rospy.loginfo(rospy.get_caller_id() + ' Data Received: ' data.data)
+    rospy.loginfo(rospy.get_caller_id() + ' Data Received: ' + data.data)
     rospy.set_param('ROBOT_STATUS', '1') # assuming 1 is not free
     dispensePump(data.data)
     rospy.set_param('ROBOT_STATUS', '0') # assuming 0 is free
@@ -40,7 +40,7 @@ def callback(data):
 def pumpControl():
     # init subscriber node to listen to websocket
     rospy.init_node('pump_controller', anonymous=True)
-    rospy.Subscriber("cmd_pump", String, callback)
+    rospy.Subscriber("PUMP_CTRL", String, callback)
     rospy.spin()
 
 
