@@ -16,12 +16,14 @@ def set_arm_position_client(poses):
         print("Service call failed: %s"%e)
 
 def callback(data):
+    rospy.set_param('/status', 'BUSY')
     if data.data == 'open':
         gripper_control_client(1)
     elif data.data == 'close':
         gripper_control_client(0)
     else:
         set_arm_position_client(ARM_POSES[data.data])
+    rospy.set_param('/status', 'FREE')
 
 def gripper_control_client(operation):
     rospy.wait_for_service('gripper_control')
@@ -34,7 +36,7 @@ def gripper_control_client(operation):
 
 if __name__ == "__main__":
     rospy.init_node('robot_arm', anonymous=True)
-    rospy.Subscriber("/arm_ctrl", String, callback)
+    rospy.Subscriber("/ARM_CTRL", String, callback)
     rospy.spin()
 
 

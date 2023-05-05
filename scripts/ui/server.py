@@ -2,7 +2,7 @@
 from flask import Flask, request, Response
 import rospy
 from std_msgs.msg import String
-
+from flask_cors import CORS, cross_origin
 # ROS
 rospy.init_node('rest_api', anonymous=True)
 pump_pub = rospy.Publisher('PUMP_CTRL', String, queue_size=10)
@@ -25,6 +25,8 @@ serve_host = "0.0.0.0"
 serve_port = "8000"
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 ROBOT_FREE_STATUS = Response(
         response="Waiter_ROS Status: FREE",

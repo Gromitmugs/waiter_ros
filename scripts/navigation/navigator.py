@@ -24,7 +24,7 @@ class Navigator():
         self.goal_sent = False
 
         # Receive command from websocket_server.py
-        rospy.Subscriber("nav_ctrl", String, self.callback)
+        rospy.Subscriber("/NAV_CTRL", String, self.callback)
 
         # What to do if shut down (e.g. Ctrl-C or failure)
         rospy.on_shutdown(self.shutdown)
@@ -38,10 +38,10 @@ class Navigator():
         self.move_base.wait_for_server(rospy.Duration(5))
 
     def callback(self, data):
-        rospy.set_param('ROBOT_STATUS', '1')  # assuming 1 is not free
+        rospy.set_param('/status', 'BUSY')
         print("NAVIGATING!")
 
-        if data.data == 'KITCHEN':
+        if data.data == 'kitchen':
             kitchen_location = ROBOT_LOCATION['kitchen']
             position = {'x': kitchen_location.position.x,
                         'y': kitchen_location.position.y}
@@ -57,7 +57,7 @@ class Navigator():
                 rospy.loginfo(
                     "The base failed to reach the desired pose at destination")
 
-        elif data.data == 'TABLE':
+        elif data.data == 'table':
             table_location = ROBOT_LOCATION['table']
             position = {'x': table_location.position.x,
                         'y': table_location.position.y}
@@ -77,7 +77,7 @@ class Navigator():
             print("The base failed to reach the desired pose")
 
         print("NAVIGATED!")
-        rospy.set_param('ROBOT_STATUS', '0')  # assuming 0 is free
+        rospy.set_param('/status', 'FREE')  # assuming 0 is free
 
     def goto(self, pos, quat):
 

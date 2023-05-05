@@ -121,7 +121,7 @@ class DiffTf:
         rospy.Subscriber("/raw_vel", Float64MultiArray, self.rawVelCallback)
         rospy.Subscriber("/raw_pos", Float64MultiArray, self.rawPosCallback)
 
-        self.odomPub = rospy.Publisher("/odom", Odometry, queue_size=10)
+        self.odomPub = rospy.Publisher("/odom_wheel", Odometry, queue_size=10)
         self.jointStatePub = rospy.Publisher("/joint_states", JointState, queue_size=10)
         self.odomBroadcaster = TransformBroadcaster()
         
@@ -170,13 +170,13 @@ class DiffTf:
             
             # publish the odom information
             quaternion = quaternion_from_euler(0, 0, self.odom_pose[2])
-            self.odomBroadcaster.sendTransform(
-                (self.x, self.y, 0), #translation
-                (quaternion[0], quaternion[1], quaternion[2], quaternion[3]), #rotation x,y,z,w
-                now, #time
-                self.odom_child_frame_id, #child
-                self.odom_frame_id #parent
-            )
+            # self.odomBroadcaster.sendTransform(
+            #     (self.x, self.y, 0), #translation
+            #     (quaternion[0], quaternion[1], quaternion[2], quaternion[3]), #rotation x,y,z,w
+            #     now, #time
+            #     self.odom_child_frame_id, #child
+            #     self.odom_frame_id #parent
+            # ) #let the efk handle tf
             
             odom = Odometry()
             odom.header.stamp = now

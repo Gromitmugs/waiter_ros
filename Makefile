@@ -64,3 +64,6 @@ show-usb:
 save-map:
 	rosrun map_server map_saver -f maps/map
 
+.PHONY: echo-goal-pose
+echo-goal-pose:
+	rostopic echo /move_base/goal
