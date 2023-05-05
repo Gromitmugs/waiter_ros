@@ -5,13 +5,14 @@ from std_msgs.msg import String
 import RPi.GPIO as gpio
 from time import sleep
 
-DIR = 18  # Direction Pin
+DIR = 14  # Direction Pin
 STEP = 15  # Step Pin
-EN = 14  # Enable Pin
+EN = 18  # Enable Pin
 
 LM = 12 # Limit Switch
 
-# data type: "TOP" "BOTTOM"
+level_1_height = 24
+
 def callback(data):
     global DIR
     global STEP
@@ -33,27 +34,39 @@ def moveLift(level):
     global STEP
     global EN
     global LM
+    global level_1_height
     print(level)
-    # move lift down
-    if level == "TOP":
-        print('moving lift top')
-        gpio.output(DIR, gpio.HIGH)
-        revConversion()
+    if level == "LEVEL_1":
+        if gpio.input(LM):
+            print('lift is not home, moving to home')
+            gpio.output(DIR, gpio.HIGH)
+            while gpio.input(LM):
+                gpio.output(STEP, gpio.HIGH)
+                sleep(.0005)
+                gpio.output(STEP, gpio.LOW)
+                sleep(.0005)
+            print('arrived at home, going to level 1')
+        if not gpio.input(LM):
+            print('lift is already home, moving to level 1')
+            gpio.output(DIR, gpio.LOW)
+            for i in range(level_1_height):
+                revConversion()
+            print('arrived at level 1')
     elif level == "HOME":
-        # if not gpio.input(LM):
-        #     print('lift is already home')
-        #     return
-        # print('moving lift home')
+        if not gpio.input(LM):
+            print('lift is already home')
+            return
+        print('moving lift home')
         gpio.output(DIR, gpio.HIGH)
         while gpio.input(LM):
             gpio.output(STEP, gpio.HIGH)
             sleep(.0005)
             gpio.output(STEP, gpio.LOW)
             sleep(.0005)
-    else:  # move lift down
-        gpio.output(DIR, gpio.LOW)
-        revConversion()
-
+        print('arrived home')
+    else:
+        print('data unknown, skipping')
+       
 
 def revConversion():
     global DIR
@@ -71,6 +84,7 @@ def init():
     global EN
     global LM
     # GPIO Setup
+    gpio.setwarnings(False)
     gpio.setmode(gpio.BCM)
     gpio.setup(LM, gpio.IN, pull_up_down=gpio.PUD_DOWN)
     gpio.setup(DIR, gpio.OUT)

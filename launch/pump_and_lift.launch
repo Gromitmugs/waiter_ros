@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="waiter_ros" type="pump.py" name="pump" output="screen"></node>
+    <node pkg="waiter_ros" type="stepper_lift.py" name="stepper_lift" output="screen"></node>
+</launch>

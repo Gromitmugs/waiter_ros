@@ -34,7 +34,7 @@ def gripper_control_client(operation):
 
 if __name__ == "__main__":
     rospy.init_node('robot_arm', anonymous=True)
-    rospy.Subscriber("/arm_ctrl", String, callback)
+    rospy.Subscriber("/ARM_CTRL", String, callback)
     rospy.spin()
 
 

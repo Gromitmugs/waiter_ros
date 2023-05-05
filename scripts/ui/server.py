@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, request, Response
+from flask_cors import CORS, cross_origin
 import rospy
 from std_msgs.msg import String
 
@@ -22,12 +23,14 @@ def robot_is_free():
 
 # Flask
 serve_host = "0.0.0.0"
-serve_port = "8000"
+serve_port = "8001"
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 ROBOT_FREE_STATUS = Response(
-        response="Waiter_ROS Status: FREE",
+        response="RASPI Waiter_ROS Status: FREE",
         status= 200
     )
 

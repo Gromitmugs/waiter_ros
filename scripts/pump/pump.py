@@ -15,6 +15,7 @@ def init():
     global PUMP2
 
     # GPIO Initial Setup
+    gpio.setwarnings(False)
     gpio.setmode(gpio.BCM)
     gpio.setup(PUMP0, gpio.OUT)
     gpio.setup(PUMP1, gpio.OUT)

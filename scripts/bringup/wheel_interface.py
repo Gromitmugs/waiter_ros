@@ -53,7 +53,7 @@ def cmd_vel_callback(msg):
     
 
 def start_odrive():
-    vel_subscribe = rospy.Subscriber("/cmd_vel", Twist, cmd_vel_callback, queue_size=2)
+    vel_subscribe = rospy.Subscriber("/cmd_vel", Twist, cmd_vel_callback, queue_size=10)
     rate = rospy.Rate(20)
     while not rospy.is_shutdown():
         try:

@@ -24,7 +24,7 @@ class Navigator():
         self.goal_sent = False
 
         # Receive command from websocket_server.py
-        rospy.Subscriber("nav_ctrl", String, self.callback)
+        rospy.Subscriber("NAV_CTRL", String, self.callback)
 
         # What to do if shut down (e.g. Ctrl-C or failure)
         rospy.on_shutdown(self.shutdown)
