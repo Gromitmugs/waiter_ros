@@ -81,7 +81,7 @@ def gripper_control(req):
         1: 'open',
     }
     gripper_positions = {
-        'close': 2442,
+        'close': 2350,
         'open': 3000,
     }
 
@@ -287,7 +287,7 @@ def check_goal_position_reached(actual, goal):
     diffs[5] = 0 #exclude gripper
     print(diffs)
     for diff in diffs:
-        if abs(diff) > 50:
+        if abs(diff) > 100:
             return False
     print("goal reached diff:",diffs)
     return True

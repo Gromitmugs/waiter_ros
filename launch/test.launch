@@ -9,7 +9,7 @@
         <param name="freq" value="5.0"/>                           
         <param name="verbose" value="true"/>                    
     </node> -->
-	<node pkg="robot_localization" type="ekf_localization_node" name="ekf_node" clear_params="true" output="screen">
+	<node pkg="robot_localization" type="ekf_localization_node" name="ekf_node" clear_params="true">
         <rosparam command="load" file="$(find waiter_ros)/params/ekf/ekf.yaml" />
 		<remap from="/odometry/filtered" to="/odom"/>
     </node>

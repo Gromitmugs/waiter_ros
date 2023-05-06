@@ -58,6 +58,7 @@ def arm_ctrl():
         return ROBOT_BUSY_STATUS
 
     req_data = request.json['data']
+    print("arm", req_data)
     arm_pub.publish(req_data)
 
     return SUCCESS_STATUS
@@ -72,6 +73,7 @@ def pump_ctrl():
         )
 
     req_data = request.json['data']
+    print("pump", req_data)
     pump_pub.publish(req_data)
 
     return SUCCESS_STATUS
@@ -84,6 +86,7 @@ def lift_ctrl():
 
     req_data = request.json['data']
     lift_pub.publish(req_data)
+    print("lift", req_data)
 
     return SUCCESS_STATUS
 
@@ -95,6 +98,7 @@ def nav_ctrl():
 
     req_data = request.json['data']
     nav_pub.publish(req_data)
+    print("nav", req_data)
 
     return SUCCESS_STATUS
 
