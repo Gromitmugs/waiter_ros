@@ -121,7 +121,7 @@ class DiffTf:
         rospy.Subscriber("/raw_vel", Float64MultiArray, self.rawVelCallback)
         rospy.Subscriber("/raw_pos", Float64MultiArray, self.rawPosCallback)
 
-        self.odomPub = rospy.Publisher("/odom", Odometry, queue_size=10)
+        self.odomPub = rospy.Publisher("/odom_wheel", Odometry, queue_size=10)
         self.jointStatePub = rospy.Publisher("/joint_states", JointState, queue_size=10)
         self.odomBroadcaster = TransformBroadcaster()
         

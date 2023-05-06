@@ -1,7 +1,16 @@
 <launch>    
-    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
-    	<param name="base_frame" type="string" value="base_link"/>
-    	<param name="odom_frame" type="string" value="odom"/>
-    	<remap from="/scan" to="/scan_filtered"/> 
+   <!-- <node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry">
+        <param name="laser_scan_topic" value="/scan_filtered"/>
+        <param name="odom_topic" value="/odom_rf2o"/>
+        <param name="publish_tf" value="false" />
+        <param name="base_frame_id" value="base_link"/>      
+        <param name="odom_frame_id" value="odom"/>              
+        <param name="init_pose_from_topic" value=""/>            
+        <param name="freq" value="5.0"/>                           
+        <param name="verbose" value="true"/>                    
+    </node> -->
+	<node pkg="robot_localization" type="ekf_localization_node" name="ekf_node" clear_params="true">
+        <rosparam command="load" file="$(find waiter_ros)/params/ekf/ekf.yaml" />
+		<remap from="/odometry/filtered" to="/odom"/>
     </node>
 </launch>

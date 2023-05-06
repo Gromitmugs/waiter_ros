@@ -2,8 +2,7 @@
 
 import rospy
 from dynamixel_sdk import *
-from dynamixel_sdk_examples.srv import *
-from dynamixel_sdk_examples.msg import *
+from waiter_ros.srv import *
 import time
 
 # Variables
@@ -17,6 +16,7 @@ ADDR_PRESENT_POSITION   = 132
 ADDR_PROFILE_VELOCITY = 112
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
+ADDR_GOAL_PWM = 100
 
 
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
@@ -29,6 +29,8 @@ LEN_GOAL_POSITION           = 4         # Data Byte Length
 LEN_PRESENT_POSITION        = 4         # Data Byte Length
 DXL_MINIMUM_POSITION_VALUE  = 0         # Refer to the Minimum Position Limit of product eManual
 DXL_MAXIMUM_POSITION_VALUE  = 4095      # Refer to the Maximum Position Limit of product eManual
+DXL_PWM_MODE = 16
+
 
 # Robot Arm IDs
 DXL_BASE = 1
@@ -47,11 +49,12 @@ DXL_SHOULDER_2_LIMIT = (1600,3400)
 DXL_SHOULDER_3_LIMIT = (0,4095)
 DXL_ELBOW_LIMIT = (800,2500)
 DXL_WRIST_LIMIT = (750,1470)
-DXL_GRIPPER_LIMIT = (2,1000)
+DXL_GRIPPER_LIMIT = (2024,3150)
 
 DXL_JOINTS_LIMITS = [DXL_BASE_LIMIT, DXL_SHOULDER_2_LIMIT, DXL_SHOULDER_3_LIMIT, DXL_ELBOW_LIMIT, DXL_WRIST_LIMIT, DXL_GRIPPER_LIMIT]
 
-DEFAULT_PROFILE_VELOCITY = 10 # value * 0.229 rpm
+DEFAULT_PROFILE_VELOCITY = 20 # value * 0.229 rpm
+DEFAULT_PWM_VAL = 885
 
 # Setup
 portHandler = PortHandler(DEVICENAME)
@@ -73,43 +76,47 @@ def get_current_position(dxl_id):
     return dxl_present_position, err
 
 def gripper_control(req):
-    if req.operation == 0:
-        gripper_vel = DEFAULT_PROFILE_VELOCITY * -1
-    elif req.operation == 1:
-        gripper_vel = DEFAULT_PROFILE_VELOCITY
-    elif req.operation == 2:
-        gripper_vel = 0
-    else:
-        return False
+    operations = {
+        0: 'close',
+        1: 'open',
+    }
+    gripper_positions = {
+        'close': 2350,
+        'open': 3000,
+    }
 
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_GRIPPER, ADDR_GOAL_VELOCITY, gripper_vel)
+    gripper_op = operations[req.operation]
+    print("gripper"+gripper_op)
+    
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_GRIPPER, ADDR_GOAL_POSITION, gripper_positions[gripper_op])
     if dxl_comm_result != COMM_SUCCESS:
         print("%s DXL_ID#%d" % packetHandler.getTxRxResult(dxl_comm_result), DXL_GRIPPER)
         return False
     elif dxl_error != 0:
         print("%s DXL_ID#%d" % packetHandler.getRxPacketError(dxl_error), DXL_GRIPPER)
-        return False
+        return False 
 
     return True
 
-def set_current_position_control_mode(dxl_id):
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, dxl_id, ADDR_OPERATING_MODE, 5)
+def set_profile_velocity(dxl_id, vel_raw):
+    err = None
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, dxl_id, ADDR_PROFILE_VELOCITY, vel_raw)
     if dxl_comm_result != COMM_SUCCESS:
-        print("%s DXL_ID#%d" % (packetHandler.getTxRxResult(dxl_comm_result), dxl_id))
+        err = ("%s DXL_ID#%d" % (packetHandler.getTxRxResult(dxl_comm_result), dxl_id))
+        return err
     elif dxl_error != 0:
-        print("%s DXL_ID#%d" % (packetHandler.getRxPacketError(dxl_error), dxl_id))
-    else:
-        print("Dynamixel#%d has been successfully configured as Current-based Position Control Mode." % dxl_id)
+        err = ("%s DXL_ID#%d" % (packetHandler.getRxPacketError(dxl_error), dxl_id))
+        return err
+
+    print("Dynamixel#%d speed set to %d" % (dxl_id, vel_raw))
+    return err
 
 def initialize_dxls(DXL_JOINTS):
     for dxl_id in DXL_JOINTS:
-        if dxl_id == DXL_GRIPPER:
-            set_current_position_control_mode(dxl_id)
-
         enable_torque(dxl_id)
         set_profile_velocity(dxl_id, DEFAULT_PROFILE_VELOCITY)
 
-    #add param test
+        #add param test
         dxl_addparam_result = groupBulkRead.addParam(dxl_id, ADDR_PRESENT_POSITION, LEN_PRESENT_POSITION)
         if dxl_addparam_result != True:
             print("[ID:%03d] groupBulkRead addparam failed" % dxl_id)
@@ -141,27 +148,13 @@ def disable_torque(dxl_id):
     print("Dynamixel#%d torque disabled" % dxl_id)
     return err
 
-def set_profile_velocity(dxl_id, vel_raw):
-    err = None
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, dxl_id, ADDR_PROFILE_VELOCITY, vel_raw)
-    if dxl_comm_result != COMM_SUCCESS:
-        err = ("%s DXL_ID#%d" % (packetHandler.getTxRxResult(dxl_comm_result), dxl_id))
-        return err
-    elif dxl_error != 0:
-        err = ("%s DXL_ID#%d" % (packetHandler.getRxPacketError(dxl_error), dxl_id))
-        return err
-
-    print("Dynamixel#%d speed set to %d" % (dxl_id, vel_raw))
-    return err
-
 def set_param_goal_position(position):
     return [DXL_LOBYTE(DXL_LOWORD(position)),
             DXL_HIBYTE(DXL_LOWORD(position)),
             DXL_LOBYTE(DXL_HIWORD(position)),
             DXL_HIBYTE(DXL_HIWORD(position))]
 
-
-def get_arm_position(req):
+def find_arm_positions():
     arm_position = [-1,-1,-1,-1,-1,-1]
 
     for dxl_id in DXL_JOINTS:
@@ -171,8 +164,11 @@ def get_arm_position(req):
         else:
             arm_position[dxl_id-1] = dxl_present_position
 
-    return arm_position[0], arm_position[1], arm_position[2], arm_position[3], arm_position[4], arm_position[5]
+    return arm_position
 
+def get_arm_position(req):
+    arm_position = find_arm_positions()
+    return arm_position[0], arm_position[1], arm_position[2], arm_position[3], arm_position[4], arm_position[5]
 
 def check_base_position_in_sync(goal_position_2, goal_position_3):
     if goal_position_3 == -1:
@@ -191,10 +187,11 @@ def check_base_position_in_sync(goal_position_2, goal_position_3):
         return False
     difference_3 = dxl_present_position_3 - goal_position_3
 
-    if abs(difference_2) - abs(difference_3) < 8:
+    if abs(abs(difference_2) - abs(difference_3)) < 50:
         if (difference_2 < 0 and difference_3 > 0) or (difference_2 > 0 and difference_3 < 0):
             return True
     else:
+        print("Base not in sync ", abs(abs(difference_2) - abs(difference_3)))
         return False
 
 def calculate_goal_position_3(goal_position_2):
@@ -238,6 +235,7 @@ def set_arm_position(req):
             print("Base not in sync")
             return False
 
+    ## check
     for position, dxl_joint_limit in zip(arm_positions, DXL_JOINTS_LIMITS):
         if not (-2 <= position <= 4095):
             print("out of min-max range")
@@ -250,11 +248,15 @@ def set_arm_position(req):
 
         print(position)
 
+    ## write
     for position, dxl_id in zip(arm_positions,DXL_JOINTS):
+        if dxl_id == DXL_GRIPPER:
+            continue
         if position == -1 or position == 0:
             continue
         if position == -2:
             return False
+        
         param_goal_position = set_param_goal_position(position)
         dxl_addparam_result = groupBulkWrite.addParam(dxl_id, ADDR_GOAL_POSITION, LEN_GOAL_POSITION, param_goal_position)
         print("ID%d: position=%d" % (dxl_id, position))
@@ -265,8 +267,33 @@ def set_arm_position(req):
     if dxl_comm_result != COMM_SUCCESS:
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         return False
+    
+    while True:
+        if check_goal_position_reached(find_arm_positions(), arm_positions):
+            break
+        
+    print("done!")
 
     return True
+
+def check_goal_position_reached(actual, goal):
+    diffs = []
+    for a,b in zip(actual,goal):
+        if b <= 0:
+            diffs.append(0)
+        else:   
+            diffs.append(abs(a) - abs(b))
+    
+    diffs[5] = 0 #exclude gripper
+    print(diffs)
+    for diff in diffs:
+        if abs(diff) > 100:
+            return False
+    print("goal reached diff:",diffs)
+    return True
+
+    
+    
 
 def set_torque(req):
     torque_settings = [req.torque_1, req.torque_2, req.torque_3, req.torque_4, req.torque_5, req.torque_6]
