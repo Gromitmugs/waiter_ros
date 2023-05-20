@@ -11,7 +11,7 @@ def set_arm_position_client(poses):
         set_arm_position = rospy.ServiceProxy('set_arm_position', SetArmPosition)
         for pose in poses:
             response = set_arm_position(pose[0],pose[1],pose[2],pose[3],pose[4],pose[5])
-            print("Result:",response.success)
+            # print("Result:",response.success)
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
 
@@ -30,7 +30,16 @@ def gripper_control_client(operation):
     try:
         gripper_control = rospy.ServiceProxy('gripper_control', GripperControl)
         response = gripper_control(operation)
-        print("Result:",response.success)
+        # print("Result:",response.success)
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+def get_input_voltage():
+    rospy.wait_for_service('gripper_control')
+    try:
+        get_input_voltage = rospy.ServiceProxy('get_input_voltage', GetInputVoltage)
+        response = get_input_voltage("dummy")
+        print("Voltage:",response.id_1,response.id_2, response.id_3, response.id_4, response.id_5, response.id_6)
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
 

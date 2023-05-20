@@ -20,14 +20,14 @@ kitchen.orientation.w = 0.027017837864690385
 
 # table
 # position
-table.position.x = 1.0408189296722412
-table.position.y = -0.30611562728881836
+table.position.x = 3.001 - 4
+table.position.y = 0.987
 table.position.z = 0.0
 # orientation
 table.orientation.x = 0.0
 table.orientation.y = 0.0
-table.orientation.z = 0.9999037310001453
-table.orientation.w = 0.013875472315893575
+table.orientation.z = 1
+table.orientation.w = 0
 
 ROBOT_LOCATION = {
     'kitchen': kitchen,

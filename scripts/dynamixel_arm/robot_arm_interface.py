@@ -4,6 +4,8 @@ import rospy
 from dynamixel_sdk import *
 from waiter_ros.srv import *
 import time
+import csv
+from datetime import datetime
 
 # Variables
 PROTOCOL_VERSION            = 2.0
@@ -17,6 +19,8 @@ ADDR_PROFILE_VELOCITY = 112
 ADDR_OPERATING_MODE = 11
 ADDR_GOAL_VELOCITY = 104
 ADDR_GOAL_PWM = 100
+ADDR_PRESENT_INPUT_VOLTAGE = 144
+ADDR_PRESENT_CURRENT = 126
 
 
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
@@ -56,12 +60,19 @@ DXL_JOINTS_LIMITS = [DXL_BASE_LIMIT, DXL_SHOULDER_2_LIMIT, DXL_SHOULDER_3_LIMIT,
 DEFAULT_PROFILE_VELOCITY = 20 # value * 0.229 rpm
 DEFAULT_PWM_VAL = 885
 
+COUNT = 0
+
 # Setup
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 groupBulkWrite = GroupBulkWrite(portHandler, packetHandler)
 groupBulkRead = GroupBulkRead(portHandler, packetHandler)
 
+
+def write_to_csv(input2dlist, name):
+    with open("results/"+name+".csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerows(input2dlist)
 
 def get_current_position(dxl_id):
     err = None
@@ -74,6 +85,42 @@ def get_current_position(dxl_id):
         return -1, err
 
     return dxl_present_position, err
+
+def get_present_current(dxl_id):
+    err = None
+    dxl_present_present_current, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, dxl_id, ADDR_PRESENT_CURRENT)
+    if dxl_comm_result != COMM_SUCCESS:
+        err = ("%s DXL_ID#%d" % (packetHandler.getTxRxResult(dxl_comm_result), dxl_id))
+        return -1, err
+    elif dxl_error != 0:
+        err = ("%s DXL_ID#%d" % (packetHandler.getRxPacketError(dxl_error), dxl_id))
+        return -1, err
+
+    return dxl_present_present_current, err
+
+def get_arm_current():
+    arm_currents = [0,0,0,0,0,0]
+
+    for dxl_id in DXL_JOINTS:
+        dxl_present_position, err = get_present_current(dxl_id)
+        if err != None:
+            print(err)
+        else:
+            arm_currents[dxl_id-1] = dxl_present_position
+
+    return arm_currents
+
+def get_input_voltage(dxl_id):
+    err = None
+    dxl_present_input_voltage, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, dxl_id, ADDR_PRESENT_INPUT_VOLTAGE)
+    if dxl_comm_result != COMM_SUCCESS:
+        err = ("%s DXL_ID#%d" % (packetHandler.getTxRxResult(dxl_comm_result), dxl_id))
+        return -1, err
+    elif dxl_error != 0:
+        err = ("%s DXL_ID#%d" % (packetHandler.getRxPacketError(dxl_error), dxl_id))
+        return -1, err
+
+    return dxl_present_input_voltage, err
 
 def gripper_control(req):
     operations = {
@@ -218,8 +265,8 @@ def calculate_goal_position_3(goal_position_2):
         return dxl_present_position_3 + abs(difference)
     return -2
 
-
 def set_arm_position(req):
+    global COUNT
     groupBulkWrite.clearParam()
     if req.position_3 != -1:
         print("position_3 needs to be -1 (always)")
@@ -249,6 +296,7 @@ def set_arm_position(req):
         print(position)
 
     ## write
+    exp_result = []
     for position, dxl_id in zip(arm_positions,DXL_JOINTS):
         if dxl_id == DXL_GRIPPER:
             continue
@@ -269,11 +317,14 @@ def set_arm_position(req):
         return False
     
     while True:
+        info = get_arm_current()
+        info.append(datetime.now())
+        exp_result.append(info)
         if check_goal_position_reached(find_arm_positions(), arm_positions):
             break
-        
-    print("done!")
 
+    write_to_csv(exp_result, "refill2servecurrent10TNUT"+str(COUNT))
+    COUNT = COUNT + 1
     return True
 
 def check_goal_position_reached(actual, goal):
@@ -285,15 +336,12 @@ def check_goal_position_reached(actual, goal):
             diffs.append(abs(a) - abs(b))
     
     diffs[5] = 0 #exclude gripper
-    print(diffs)
+    # print(diffs)
     for diff in diffs:
         if abs(diff) > 100:
             return False
     print("goal reached diff:",diffs)
     return True
-
-    
-    
 
 def set_torque(req):
     torque_settings = [req.torque_1, req.torque_2, req.torque_3, req.torque_4, req.torque_5, req.torque_6]
@@ -312,12 +360,33 @@ def set_torque(req):
                 print(err)
     return True
 
+def get_input_voltage_bulk(req):
+    result = [-1, -1, -1, -1, -1 , -1]
+    for dxl_id in DXL_JOINTS:
+        dxl_present_voltage, err = get_input_voltage(dxl_id)
+        if err != None:
+            print(err)
+        else:
+            result[dxl_id-1] = dxl_present_voltage
+    return result[0], result[1], result[2], result[3], result[4], result[5]
+
+def get_input_voltage_arm():
+    result = [-1, -1, -1, -1, -1 , -1]
+    for dxl_id in DXL_JOINTS:
+        dxl_present_voltage, err = get_input_voltage(dxl_id)
+        if err != None:
+            print(err)
+        else:
+            result[dxl_id-1] = dxl_present_voltage
+    return result
+    
 def read_write_py_node():
     rospy.init_node('read_write_py_node')
     rospy.Service('get_arm_position', GetArmPosition, get_arm_position)
     rospy.Service('set_arm_position', SetArmPosition, set_arm_position)
     rospy.Service('set_torque', SetTorque, set_torque)
     rospy.Service('gripper_control', GripperControl, gripper_control)
+    rospy.Service('get_input_voltage', GetInputVoltage, get_input_voltage_bulk)
     rospy.spin()
 
 def main():

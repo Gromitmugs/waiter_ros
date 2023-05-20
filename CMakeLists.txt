@@ -51,6 +51,7 @@ add_service_files(
     SetArmPosition.srv
     SetTorque.srv
     GripperControl.srv
+    GetInputVoltage.srv
 )
 
 ## Generate actions in the 'action' folder
